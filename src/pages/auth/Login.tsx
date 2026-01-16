@@ -50,13 +50,6 @@ export default function Login() {
           <p className="mt-2 text-center text-sm text-gray-600">
             欢迎回到中国青少年无人机科学素养培训平台
           </p>
-          {isMockMode && (
-             <div className="mt-4 bg-yellow-50 border border-yellow-200 p-3 rounded-md">
-               <p className="text-yellow-700 text-sm text-center font-medium">
-                 当前为演示模式，无需真实密码即可登录。
-               </p>
-             </div>
-          )}
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleLogin}>
           <div className="rounded-md shadow-sm -space-y-px">
@@ -111,9 +104,9 @@ export default function Login() {
           </div>
           
           <div className="text-center mt-4">
-             <p className="text-sm text-gray-500">
+             {/* <p className="text-sm text-gray-500">
                {isMockMode ? '任意邮箱/密码均可体验' : '测试账号: test@example.com / password123'}
-             </p>
+             </p> */}
           </div>
         </form>
       </div>

@@ -13,6 +13,8 @@ import Courses from "@/pages/member/Courses";
 import Profile from "@/pages/member/Profile";
 import Progress from "@/pages/member/Progress";
 import Awards from "@/pages/member/Awards";
+import GameIntro from "@/pages/game/Intro";
+import GameRun from "@/pages/game/Game";
 import Navbar from "@/components/Layout/Navbar";
 import Footer from "@/components/Layout/Footer";
 
@@ -39,6 +41,10 @@ export default function App() {
         
         {/* Auth Route */}
         <Route path="/member/login" element={<PublicLayout><Login /></PublicLayout>} />
+
+        {/* Game Routes */}
+        <Route path="/game" element={<GameIntro />} />
+        <Route path="/game/run" element={<GameRun />} />
         
         {/* Member Routes - Protected */}
         <Route path="/member" element={<MemberLayout />}>
