@@ -85,18 +85,21 @@ export default function BookingList() {
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     状态
                   </th>
+                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    操作
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {bookings.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                    <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
                       暂无预约记录
                     </td>
                   </tr>
                 ) : (
                   bookings.map((booking) => (
-                    <tr key={booking.id} className="hover:bg-gray-50">
+                    <tr key={booking.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         #{booking.id}
                       </td>
@@ -117,15 +120,36 @@ export default function BookingList() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center text-sm text-gray-500">
+                        <div className="flex items-center text-sm text-gray-500 group">
                           <Phone className="w-4 h-4 mr-2 text-gray-400" />
-                          {booking.phone}
+                          <span className="mr-3">{booking.phone}</span>
+                          <button 
+                            onClick={(e) => handleWeChatAdd(booking.phone, e)}
+                            className="text-green-500 hover:text-green-600 p-1 rounded hover:bg-green-50 transition-colors"
+                            title="复制号码并打开微信"
+                          >
+                            <MessageSquare className="w-4 h-4" />
+                          </button>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                          待联系
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          booking.status === 'completed' ? 'bg-green-100 text-green-800' :
+                          booking.status === 'contacted' ? 'bg-blue-100 text-blue-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {booking.status === 'completed' ? '已报名' : 
+                           booking.status === 'contacted' ? '已跟进' : '待处理'}
                         </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button 
+                          onClick={() => navigate(`/admin/bookings/${booking.id}`)}
+                          className="text-indigo-600 hover:text-indigo-900 flex items-center justify-end w-full"
+                        >
+                          <Edit className="w-4 h-4 mr-1" />
+                          编辑
+                        </button>
                       </td>
                     </tr>
                   ))

@@ -5,7 +5,7 @@ import { Lock, User } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 export default function Login() {
-  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -18,12 +18,21 @@ export default function Login() {
     setError(null);
 
     try {
+      // Determine redirect path
+      const redirectPath = searchParams.get('redirect') || '/member/dashboard';
+      
+      // Auto-append domain for email-based auth
+      const email = `${phone}@teenagedrone.com`;
+
       if (isMockMode) {
-        // Mock Login
-        await signIn(email);
-        // Simulate delay
-        await new Promise(resolve => setTimeout(resolve, 800));
-        navigate('/member/dashboard');
+        // Mock Login with simple validation
+        if ((phone === '13800138000' && password === '123456') || (phone === 'admin' && password === 'admin')) {
+           await signIn(email);
+           await new Promise(resolve => setTimeout(resolve, 500));
+           navigate(redirectPath);
+        } else {
+           throw new Error('演示模式：账号或密码错误（试用: 13800138000 / 123456）');
+        }
       } else {
         // Real Supabase Login
         const { error } = await supabase.auth.signInWithPassword({
@@ -31,7 +40,7 @@ export default function Login() {
           password,
         });
         if (error) throw error;
-        navigate('/member/dashboard');
+        navigate(redirectPath);
       }
     } catch (err: any) {
       setError(err.message || '登录失败，请检查用户名和密码');
@@ -104,9 +113,11 @@ export default function Login() {
           </div>
           
           <div className="text-center mt-4">
-             {/* <p className="text-sm text-gray-500">
-               {isMockMode ? '任意邮箱/密码均可体验' : '测试账号: test@example.com / password123'}
-             </p> */}
+             {isMockMode && (
+               <p className="text-sm text-gray-500">
+                 测试账号: 13800138000 / 123456
+               </p>
+             )}
           </div>
         </form>
       </div>

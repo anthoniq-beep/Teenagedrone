@@ -6,6 +6,7 @@ import Competitions from "@/pages/public/Competitions";
 import Introduction from "@/pages/introduction/Index";
 import Booking from "@/pages/booking/Index";
 import BookingList from "@/pages/admin/BookingList";
+import BookingDetail from "@/pages/admin/BookingDetail";
 import MemberList from "@/pages/admin/MemberList";
 import AdminDashboard from "@/pages/admin/Dashboard";
 import AdminCourses from "@/pages/admin/Courses";
@@ -63,6 +64,7 @@ export default function App() {
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="bookings" element={<BookingList />} />
+          <Route path="bookings/:id" element={<BookingDetail />} />
           <Route path="users" element={<MemberList />} />
           <Route path="courses" element={<AdminCourses />} />
           {/* Placeholder for settings */}
