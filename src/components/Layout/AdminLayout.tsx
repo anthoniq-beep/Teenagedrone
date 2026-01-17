@@ -10,13 +10,13 @@ export default function AdminLayout() {
 
   useEffect(() => {
     if (!loading && !user) {
-      navigate('/member/login?redirect=/admin/dashboard');
+      navigate('/admin/login?redirect=' + encodeURIComponent(location.pathname));
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, navigate, location]);
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/member/login?redirect=/admin/dashboard');
+    navigate('/admin/login');
   };
 
   if (loading) return <div className="flex justify-center items-center h-screen">加载中...</div>;

@@ -44,8 +44,9 @@ export default function App() {
         <Route path="/introduction" element={<PublicLayout><Introduction /></PublicLayout>} />
         <Route path="/booking" element={<PublicLayout><Booking /></PublicLayout>} />
         
-        {/* Auth Route */}
+        {/* Auth Routes */}
         <Route path="/member/login" element={<PublicLayout><Login /></PublicLayout>} />
+        <Route path="/admin/login" element={<AdminLogin />} />
 
         {/* Game Routes */}
         <Route path="/game" element={<GameIntro />} />
