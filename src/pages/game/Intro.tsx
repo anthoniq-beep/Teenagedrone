@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button'; // Assuming shadcn or similar, or standard html button if not
+
 import { Plane } from 'lucide-react';
 
 export default function GameIntro() {
