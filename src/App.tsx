@@ -12,6 +12,7 @@ import AdminDashboard from "@/pages/admin/Dashboard";
 import AdminCourses from "@/pages/admin/Courses";
 import AdminLayout from "@/components/Layout/AdminLayout";
 import Login from "@/pages/auth/Login";
+import AdminLogin from "@/pages/auth/AdminLogin";
 import MemberLayout from "@/components/Layout/MemberLayout";
 import Dashboard from "@/pages/member/Dashboard";
 import Courses from "@/pages/member/Courses";
