@@ -3,6 +3,7 @@ import { supabase, isMockMode } from '@/lib/supabase';
 import { Calendar, Phone, User, Clock, Shield, Trash2, Edit, BookOpen } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+// Interface for Member
 interface Member {
   id: string;
   username: string;
