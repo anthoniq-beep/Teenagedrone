@@ -6,6 +6,10 @@ import Competitions from "@/pages/public/Competitions";
 import Introduction from "@/pages/introduction/Index";
 import Booking from "@/pages/booking/Index";
 import BookingList from "@/pages/admin/BookingList";
+import MemberList from "@/pages/admin/MemberList";
+import AdminDashboard from "@/pages/admin/Dashboard";
+import AdminCourses from "@/pages/admin/Courses";
+import AdminLayout from "@/components/Layout/AdminLayout";
 import Login from "@/pages/auth/Login";
 import MemberLayout from "@/components/Layout/MemberLayout";
 import Dashboard from "@/pages/member/Dashboard";
@@ -53,8 +57,16 @@ export default function App() {
           <Route path="profile" element={<Profile />} />
           <Route path="progress" element={<Progress />} />
           <Route path="awards" element={<Awards />} />
-          {/* Admin Route - Ideally should have role check */}
+        </Route>
+
+        {/* Admin Routes - Business/Staff Only */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="bookings" element={<BookingList />} />
+          <Route path="users" element={<MemberList />} />
+          <Route path="courses" element={<AdminCourses />} />
+          {/* Placeholder for settings */}
+          <Route path="settings" element={<div className="p-6">系统设置功能开发中...</div>} />
         </Route>
       </Routes>
     </Router>

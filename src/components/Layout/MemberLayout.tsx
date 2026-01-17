@@ -27,8 +27,6 @@ export default function MemberLayout() {
     { name: '培训进度', path: '/member/progress', icon: <BarChart className="w-5 h-5 mr-3" /> },
     { name: '获奖墙', path: '/member/awards', icon: <Trophy className="w-5 h-5 mr-3" /> },
     { name: '个人信息', path: '/member/profile', icon: <User className="w-5 h-5 mr-3" /> },
-    // Admin link (visible to all logged-in users for now)
-    { name: '预约管理', path: '/member/bookings', icon: <ClipboardList className="w-5 h-5 mr-3" /> },
   ];
 
   return (

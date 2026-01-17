@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase, isMockMode } from '@/lib/supabase';
 import { Lock, User } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
