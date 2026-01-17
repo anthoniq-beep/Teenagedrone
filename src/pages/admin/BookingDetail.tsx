@@ -88,8 +88,7 @@ export default function BookingDetail() {
   const handleWeChatAdd = () => {
     if (!booking?.phone) return;
     navigator.clipboard.writeText(booking.phone).then(() => {
-      alert(`已复制手机号 ${booking.phone}，即将打开微信...`);
-      window.location.href = "weixin://";
+      alert(`已复制手机号: ${booking.phone}\n\n请手动打开微信，粘贴手机号添加好友。`);
     }).catch(() => {
       alert('复制失败，请手动复制手机号');
     });

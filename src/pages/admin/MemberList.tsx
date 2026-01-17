@@ -149,8 +149,15 @@ export default function MemberList() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button 
+                          onClick={() => navigate(`/admin/users/${member.id}/courses`)}
+                          className="text-indigo-600 hover:text-indigo-900 mr-4 flex items-center inline-flex"
+                        >
+                          <BookOpen className="w-4 h-4 mr-1" />
+                          课程
+                        </button>
+                        <button 
                           onClick={() => handleDelete(member.id)}
-                          className="text-red-600 hover:text-red-900 ml-4"
+                          className="text-red-600 hover:text-red-900 inline-flex items-center"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

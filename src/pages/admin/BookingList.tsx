@@ -50,8 +50,9 @@ export default function BookingList() {
   const handleWeChatAdd = (phone: string, e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent row click
     navigator.clipboard.writeText(phone).then(() => {
-      alert(`已复制手机号 ${phone}，即将打开微信...`);
-      window.location.href = "weixin://";
+      alert(`已复制手机号: ${phone}\n\n请手动打开微信，粘贴手机号添加好友。`);
+      // Optional: still try to open weixin just in case
+      // window.location.href = "weixin://"; 
     }).catch(() => {
       alert('复制失败，请手动复制手机号');
     });

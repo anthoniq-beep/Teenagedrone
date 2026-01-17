@@ -68,6 +68,7 @@ export default function App() {
           <Route path="bookings" element={<BookingList />} />
           <Route path="bookings/:id" element={<BookingDetail />} />
           <Route path="users" element={<MemberList />} />
+          <Route path="users/:id/courses" element={<MemberCourseDetail />} />
           <Route path="courses" element={<AdminCourses />} />
           {/* Placeholder for settings */}
           <Route path="settings" element={<div className="p-6">系统设置功能开发中...</div>} />
