@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase, isMockMode } from '@/lib/supabase';
-import { ArrowLeft, BookOpen, Plus, Clock, Save, Trash2, CreditCard } from 'lucide-react';
+import { ArrowLeft, BookOpen, Plus, Clock, Save, Trash2, CreditCard, User, Phone } from 'lucide-react';
 
 interface MemberCourse {
   id: string;

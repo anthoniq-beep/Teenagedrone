@@ -8,6 +8,7 @@ import Booking from "@/pages/booking/Index";
 import BookingList from "@/pages/admin/BookingList";
 import BookingDetail from "@/pages/admin/BookingDetail";
 import MemberList from "@/pages/admin/MemberList";
+import MemberCourseDetail from "@/pages/admin/MemberCourseDetail";
 import AdminDashboard from "@/pages/admin/Dashboard";
 import AdminCourses from "@/pages/admin/Courses";
 import AdminLayout from "@/components/Layout/AdminLayout";
