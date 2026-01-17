@@ -1,129 +1,82 @@
--- Create users table
-CREATE TABLE users (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    username VARCHAR(50) UNIQUE NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
+-- 1. 用户表 (Users) - 通常建议与 Supabase Auth 联动
+-- 这里我们假设使用 public.users 表来存储额外信息
+CREATE TABLE IF NOT EXISTS users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- 如果与 Supabase Auth 联动，这里应该是 REFERENCES auth.users(id)
+    username VARCHAR(255),
+    email VARCHAR(255),
+    phone VARCHAR(20),
     role VARCHAR(20) DEFAULT 'student' CHECK (role IN ('student', 'admin')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create indexes for users
-CREATE INDEX idx_users_username ON users(username);
-CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_users_role ON users(role);
-
--- Create courses table
-CREATE TABLE courses (
+-- 2. 课程表 (Courses) - 用于前台展示和后台管理
+CREATE TABLE IF NOT EXISTS courses (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name VARCHAR(200) NOT NULL,
-    level VARCHAR(20) CHECK (level IN ('basic', 'intermediate', 'advanced')),
+    name VARCHAR(255) NOT NULL,
+    level VARCHAR(50) DEFAULT 'basic', -- basic, intermediate, advanced
     description TEXT,
-    advantages TEXT[],
-    age_range VARCHAR(50),
-    duration INTEGER,
+    duration INTEGER DEFAULT 0, -- 标准课时数
+    status VARCHAR(50) DEFAULT 'active', -- active (招生中), planning (筹备中)
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create index for courses
-CREATE INDEX idx_courses_level ON courses(level);
-
--- Create enrollments table
-CREATE TABLE enrollments (
+-- 3. 会员课程表 (Member Courses) - 记录每个会员购买的课程和剩余课时
+CREATE TABLE IF NOT EXISTS member_courses (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
-    progress DECIMAL(5,2) DEFAULT 0.00,
-    status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'completed', 'paused')),
-    enrollment_date DATE DEFAULT CURRENT_DATE,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    UNIQUE(user_id, course_id)
+    member_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    course_name VARCHAR(255) NOT NULL, -- 冗余存储课程名，防止课程表删除后数据丢失，或者关联 courses(id)
+    total_hours INTEGER DEFAULT 0,
+    remaining_hours INTEGER DEFAULT 0,
+    used_hours INTEGER DEFAULT 0,
+    card_id VARCHAR(50), -- 实体会员卡ID，用于读卡器
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create indexes for enrollments
-CREATE INDEX idx_enrollments_user_id ON enrollments(user_id);
-CREATE INDEX idx_enrollments_course_id ON enrollments(course_id);
-CREATE INDEX idx_enrollments_status ON enrollments(status);
-
--- Create competitions table
-CREATE TABLE competitions (
+-- 4. 预约表 (Bookings) - 记录前台提交的试听预约
+CREATE TABLE IF NOT EXISTS bookings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name VARCHAR(200) NOT NULL,
-    category VARCHAR(100),
-    level VARCHAR(50),
-    eligibility TEXT,
-    competition_date DATE,
-    description TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    name VARCHAR(100) NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    date DATE NOT NULL,
+    course_type VARCHAR(50),
+    status VARCHAR(20) DEFAULT 'pending', -- pending, confirmed, completed, cancelled
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create indexes for competitions
-CREATE INDEX idx_competitions_category ON competitions(category);
-CREATE INDEX idx_competitions_date ON competitions(competition_date);
+-- 索引 (Indexes)
+CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
+CREATE INDEX IF NOT EXISTS idx_courses_status ON courses(status);
+CREATE INDEX IF NOT EXISTS idx_member_courses_member_id ON member_courses(member_id);
+CREATE INDEX IF NOT EXISTS idx_member_courses_card_id ON member_courses(card_id);
+CREATE INDEX IF NOT EXISTS idx_bookings_status ON bookings(status);
+CREATE INDEX IF NOT EXISTS idx_bookings_phone ON bookings(phone);
 
--- Create awards table
-CREATE TABLE awards (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    competition_id UUID REFERENCES competitions(id) ON DELETE CASCADE,
-    award_type VARCHAR(100),
-    award_date DATE,
-    certificate_url VARCHAR(500),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Create indexes for awards
-CREATE INDEX idx_awards_user_id ON awards(user_id);
-CREATE INDEX idx_awards_competition_id ON awards(competition_id);
-CREATE INDEX idx_awards_date ON awards(award_date);
-
--- Create progress_tracking table
-CREATE TABLE progress_tracking (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
-    skills JSONB,
-    achievements JSONB,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    UNIQUE(user_id, course_id)
-);
-
--- Create indexes for progress_tracking
-CREATE INDEX idx_progress_user_id ON progress_tracking(user_id);
-CREATE INDEX idx_progress_course_id ON progress_tracking(course_id);
-
--- Enable RLS
-ALTER TABLE enrollments ENABLE ROW LEVEL SECURITY;
-ALTER TABLE awards ENABLE ROW LEVEL SECURITY;
-ALTER TABLE progress_tracking ENABLE ROW LEVEL SECURITY;
+-- 启用行级安全 (RLS)
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE courses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE member_courses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
 
--- Grant permissions (Adjust based on your Supabase configuration, usually 'authenticated' and 'anon' roles exist)
--- Note: 'anon' role is for public access, 'authenticated' is for logged in users.
+-- RLS 策略 (Policies)
+-- 为了简化开发，这里允许 authenticated 用户（通常是管理员或登录后的会员）进行操作
+-- 实际生产中应根据 role 字段细分权限
 
--- Public access to courses and competitions
-GRANT SELECT ON courses TO anon, authenticated;
-GRANT SELECT ON competitions TO anon, authenticated;
+-- Users: 允许所有认证用户读取，允许用户自己修改，允许管理员修改所有
+CREATE POLICY "Public read access" ON users FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Admin full access" ON users FOR ALL TO authenticated USING (true) WITH CHECK (true); -- 简化版：假设登录即有权
 
--- Authenticated access
-GRANT ALL PRIVILEGES ON enrollments TO authenticated;
-GRANT ALL PRIVILEGES ON awards TO authenticated;
-GRANT ALL PRIVILEGES ON progress_tracking TO authenticated;
-GRANT SELECT ON users TO authenticated;
+-- Courses: 允许公开读取 (anon)，允许认证用户增删改
+CREATE POLICY "Public read access" ON courses FOR SELECT TO anon USING (true);
+CREATE POLICY "Authenticated read access" ON courses FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Admin full access" ON courses FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
--- RLS Policies
--- Users can only see their own data
-CREATE POLICY "Users can view own enrollments" ON enrollments FOR SELECT TO authenticated USING (auth.uid() = user_id);
-CREATE POLICY "Users can view own awards" ON awards FOR SELECT TO authenticated USING (auth.uid() = user_id);
-CREATE POLICY "Users can view own progress" ON progress_tracking FOR SELECT TO authenticated USING (auth.uid() = user_id);
-CREATE POLICY "Users can view own profile" ON users FOR SELECT TO authenticated USING (auth.uid() = id);
+-- Member Courses: 仅允许认证用户操作
+CREATE POLICY "Admin full access" ON member_courses FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
--- Assuming auth.uid() matches the id in users table.
--- Note: In standard Supabase Auth, the auth.users table is separate from public.users.
--- If you are using Supabase Auth, you might want to link them or just use auth.users.
--- For this simplified schema, we assume we are syncing or using a custom auth approach, 
--- but realistically with Supabase Auth, we should use a trigger to create a public.user record on signup.
--- For now, we will stick to the provided schema but add a note that the user_id FK should ideally link to auth.users if possible, 
--- or we handle it manually. The schema provided uses a custom 'users' table in public schema.
+-- Bookings: 允许公开插入 (anon)，允许认证用户管理
+CREATE POLICY "Public insert access" ON bookings FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY "Admin full access" ON bookings FOR ALL TO authenticated USING (true) WITH CHECK (true);
