@@ -1,18 +1,21 @@
 import { useEffect, useState } from 'react';
 import { supabase, isMockMode } from '@/lib/supabase';
-import { Calendar, Phone, User, Clock } from 'lucide-react';
+import { Calendar, Phone, User, Clock, MessageSquare, Edit } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface Booking {
   id: number;
   created_at: string;
   name: string;
   phone: string;
+  status?: string; // pending, contacted, completed, closed
 }
 
 export default function BookingList() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchBookings();
@@ -24,8 +27,8 @@ export default function BookingList() {
       if (isMockMode) {
         // Mock data
         setBookings([
-          { id: 1, created_at: new Date().toISOString(), name: '张三 (演示)', phone: '13800138000' },
-          { id: 2, created_at: new Date(Date.now() - 86400000).toISOString(), name: '李四 (演示)', phone: '13900139000' },
+          { id: 1, created_at: new Date().toISOString(), name: '张三 (演示)', phone: '13800138000', status: 'pending' },
+          { id: 2, created_at: new Date(Date.now() - 86400000).toISOString(), name: '李四 (演示)', phone: '13900139000', status: 'contacted' },
         ]);
       } else {
         const { data, error } = await supabase
@@ -44,10 +47,20 @@ export default function BookingList() {
     }
   };
 
+  const handleWeChatAdd = (phone: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent row click
+    navigator.clipboard.writeText(phone).then(() => {
+      alert(`已复制手机号 ${phone}，即将打开微信...`);
+      window.location.href = "weixin://";
+    }).catch(() => {
+      alert('复制失败，请手动复制手机号');
+    });
+  };
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">预约管理后台</h1>
+        <h1 className="text-2xl font-bold text-gray-800">预约管理</h1>
         <div className="text-sm text-gray-500">
           共 {bookings.length} 条记录
         </div>
