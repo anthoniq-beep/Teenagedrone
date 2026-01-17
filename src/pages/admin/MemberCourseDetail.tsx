@@ -19,6 +19,12 @@ interface Member {
   phone?: string;
 }
 
+interface AvailableCourse {
+  id: string;
+  name: string;
+  duration: number;
+}
+
 export default function MemberCourseDetail() {
   const { id } = useParams<{ id: string }>(); // Member ID
   const navigate = useNavigate();
@@ -26,13 +32,51 @@ export default function MemberCourseDetail() {
   const [courses, setCourses] = useState<MemberCourse[]>([]);
   const [loading, setLoading] = useState(true);
   
+  // Available courses for dropdown
+  const [availableCourses, setAvailableCourses] = useState<AvailableCourse[]>([]);
+  
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newCourse, setNewCourse] = useState({ course_name: '', total_hours: 10, card_id: '' });
 
   useEffect(() => {
-    if (id) fetchData();
+    if (id) {
+      fetchData();
+      fetchAvailableCourses();
+    }
   }, [id]);
+
+  const fetchAvailableCourses = async () => {
+    try {
+      if (isMockMode) {
+        setAvailableCourses([
+          { id: '1', name: 'L1 无人机启蒙', duration: 20 },
+          { id: '2', name: 'L2 进阶飞行', duration: 30 },
+        ]);
+      } else {
+        const { data, error } = await supabase
+          .from('courses')
+          .select('id, name, duration')
+          .eq('status', 'active'); // Only active courses
+        
+        if (error) throw error;
+        setAvailableCourses(data || []);
+      }
+    } catch (err) {
+      console.error('Error fetching available courses:', err);
+    }
+  };
+
+  const handleCourseSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedName = e.target.value;
+    const selectedCourse = availableCourses.find(c => c.name === selectedName);
+    
+    setNewCourse({
+      ...newCourse,
+      course_name: selectedName,
+      total_hours: selectedCourse ? selectedCourse.duration : 10
+    });
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -46,10 +90,9 @@ export default function MemberCourseDetail() {
           { id: '2', course_name: 'L2 进阶飞行', total_hours: 30, remaining_hours: 30, used_hours: 0, card_id: 'CARD002' },
         ]);
       } else {
-        // 1. Fetch Member Info (Assuming from auth.users or public.users)
-        // Note: Direct access to auth.users is restricted, we assume public.users sync or use admin API
+        // 1. Fetch Member Info
         const { data: userData, error: userError } = await supabase
-          .from('users') // Assuming we are using the public users table
+          .from('users')
           .select('*')
           .eq('id', id)
           .single();
@@ -68,13 +111,14 @@ export default function MemberCourseDetail() {
       }
     } catch (err: any) {
       console.error('Error:', err);
-      // alert('加载失败: ' + err.message);
     } finally {
       setLoading(false);
     }
   };
 
   const handleAddCourse = async () => {
+    if (!newCourse.course_name) return alert('请选择课程');
+
     try {
       if (isMockMode) {
         const mockNew = { 
@@ -121,10 +165,8 @@ export default function MemberCourseDetail() {
 
   const handleUpdateHours = async (course: MemberCourse, change: number) => {
     const newRemaining = course.remaining_hours + change;
-    const newUsed = course.used_hours - change; // Simple logic: if adding hours, used doesn't change usually, but if "undoing" class, used decreases. 
-    // Actually, usually we just want to "deduct" 1 hour for class taken.
+    const newUsed = course.used_hours - change; 
     
-    // Let's implement "Deduct 1 Hour" button
     if (newRemaining < 0) return alert('剩余课时不足');
 
     try {
@@ -227,14 +269,17 @@ export default function MemberCourseDetail() {
             <h2 className="text-xl font-bold mb-4">为会员添加课程</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">课程名称</label>
-                <input 
-                  type="text" 
+                <label className="block text-sm font-medium text-gray-700 mb-1">选择课程</label>
+                <select 
                   className="w-full border border-gray-300 rounded-md p-2"
                   value={newCourse.course_name}
-                  onChange={e => setNewCourse({...newCourse, course_name: e.target.value})}
-                  placeholder="例如：L1 无人机启蒙"
-                />
+                  onChange={handleCourseSelect}
+                >
+                  <option value="">请选择...</option>
+                  {availableCourses.map(c => (
+                    <option key={c.id} value={c.name}>{c.name} ({c.duration}课时)</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">总课时 (Hours)</label>
